@@ -7,7 +7,10 @@
     "watch": "tsc -w",
     "prestart": "npm run build",
     "start": "func start",
-    "test": "echo \"No tests yet...\""
+    "test": "echo \"No tests yet...\"",
+    "deploy:stage": "func azure functionapp publish fa-products-service-ne-574 --slot staging",
+    "deploy:prod": "az functionapp deployment slot swap --name \"fa-products-service-ne-574\" --resource-group \"rg-product-service-sand-ne-574\" --slot staging --target-slot production",
+    "deploy": "npm run build && npm run deploy:stage && npm run deploy:prod"
   },
   "dependencies": {
     "@azure/app-configuration": "^1.5.0",
