@@ -1,6 +1,4 @@
 export interface Config {
-  appName?: string;
-  runningEnv?: string;
-  featureAEnabled?: boolean;
-  testAppSettingsTextAlign?: string;
+  db_key?: string;
+  db_endpoint?: string;
 }

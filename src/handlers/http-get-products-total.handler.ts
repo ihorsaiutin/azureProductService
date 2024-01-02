@@ -7,27 +7,27 @@ import { Logger } from "../common/logger/logger";
 import { ProductService } from "../modules/product/product.service";
 
 @injectable()
-export class HttpProductListHandler extends BaseHandler {
+export class HttpGetProductsTotalHandler extends BaseHandler {
   constructor(
     private readonly logger: Logger,
     private readonly productService: ProductService
   ) {
     super();
-    this.logger.setClassContext(HttpProductListHandler.name);
+    this.logger.setClassContext(HttpGetProductsTotalHandler.name);
   }
 
   async executeFunction(context: Context): Promise<void> {
     try {
-      this.logger.info("Processing HttpProductListHandler request!");
+      this.logger.info("Processing HttpGetProductsTotalHandler request!");
 
-      const products = await this.productService.getProducts();
+      const total = await this.productService.getProductsTotal();
 
       context.res = {
         status: 200,
         headers: {
           "content-type": "application/json",
         },
-        body: products,
+        body: total,
       };
     } catch (e) {
       this.logger.error(e);
@@ -38,4 +38,4 @@ export class HttpProductListHandler extends BaseHandler {
   }
 }
 
-export const handler = makeHandler(HttpProductListHandler);
+export const handler = makeHandler(HttpGetProductsTotalHandler);
