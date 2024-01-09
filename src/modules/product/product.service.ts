@@ -1,65 +1,56 @@
-import { inject, injectable } from "inversify";
+import { injectable } from "inversify";
+
 import { Logger } from "../../common/logger/logger";
-import { ClassForFactoryServiceFactory } from "../../common/execution-context-aware-factory/types";
-import { CLASS_FACTORY } from "../../common/execution-context-aware-factory/di";
-
-type Product = {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-};
-
-const products: Product[] = [
-  {
-    id: "test-id-1",
-    title: "Test Product 1",
-    description: "some description for Test Product 1",
-    price: 80_000,
-  },
-  {
-    id: "test-id-2",
-    title: "Test Product 2",
-    description: "some description for Test Product 2",
-    price: 80_000,
-  },
-  {
-    id: "test-id-3",
-    title: "Test Product 3",
-    description: "some description for Test Product 3",
-    price: 80_000,
-  },
-  {
-    id: "test-id-4",
-    title: "Test Product 4",
-    description: "some description for Test Product 4",
-    price: 80_000,
-  },
-  {
-    id: "test-id-5",
-    title: "Test Product 5",
-    description: "some description for Test Product 5",
-    price: 80_000,
-  },
-];
+import { ProductDatabase } from "../../database/product.db";
+import { NewProduct, NewUserProduct, UserProduct } from "../../common/types";
+import { StockService } from "../stocks/stock.service";
 
 @injectable()
 export class ProductService {
   constructor(
     private readonly logger: Logger,
-    @inject(CLASS_FACTORY)
-    private readonly factory: ClassForFactoryServiceFactory
+    private readonly database: ProductDatabase,
+    private readonly stockService: StockService
   ) {
     this.logger.setClassContext(ProductService.name);
   }
 
-  async getProducts() {
+  async getProducts(): Promise<UserProduct[]> {
     this.logger.info("Get products");
-    return products;
+
+    const products = await this.database.getProducts();
+    const stocks = await this.stockService.getStocks();
+
+    const productsWithCount = products.map((product) => ({
+      ...product,
+      count:
+        stocks.find((stock) => stock.product_id === product.id)?.count || 0,
+    }));
+    return productsWithCount;
   }
 
-  async getProduct(productId) {
-    this.logger.info("Get product by ID");
-    return products.find(({ id }) => id === productId);
+  async getProduct(productId: string): Promise<UserProduct> {
+    this.logger.info("Get product by ID", productId);
+
+    const product = await this.database.getProduct(productId);
+    const stock = await this.stockService.getStock(productId);
+    return { ...product, count: stock.count || 0 };
+  }
+
+  async createProduct(data: NewUserProduct) {
+    this.logger.info("Create product", data);
+
+    const { count, ...productData } = data;
+    const { id } = await this.database.createProduct(productData);
+    await this.stockService.createStock({
+      count,
+      product_id: id,
+    });
+    return { ...data, id };
+  }
+
+  async getProductsTotal() {
+    this.logger.info("Get products total");
+    return this.stockService.getStocksTotal();
   }
 }

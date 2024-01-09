@@ -10,15 +10,20 @@
     "test": "echo \"No tests yet...\"",
     "deploy:stage": "func azure functionapp publish fa-products-service-ne-574 --slot staging",
     "deploy:prod": "az functionapp deployment slot swap --name \"fa-products-service-ne-574\" --resource-group \"rg-product-service-sand-ne-574\" --slot staging --target-slot production",
-    "deploy": "npm run build && npm run deploy:stage && npm run deploy:prod"
+    "deploy": "npm run build && npm run deploy:stage && npm run deploy:prod",
+    "dev:seed": "node ./seeds/index.ts"
   },
   "dependencies": {
     "@azure/app-configuration": "^1.5.0",
+    "@azure/cosmos": "^4.0.0",
+    "class-validator": "^0.14.0",
+    "dotenv": "^16.3.1",
     "inversify": "^6.0.1",
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
     "@azure/functions": "^3.0.0",
+    "@faker-js/faker": "^8.3.1",
     "@types/node": "18.x",
     "azure-functions-core-tools": "^4.x",
     "typescript": "^4.0.0"

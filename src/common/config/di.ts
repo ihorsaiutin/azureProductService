@@ -2,11 +2,7 @@ import { appContainer } from "../inversify/container";
 import { Config } from "./types";
 import { interfaces } from "inversify";
 import ServiceIdentifier = interfaces.ServiceIdentifier;
-import {
-  AppConfigurationClient,
-  featureFlagPrefix,
-  parseFeatureFlag,
-} from "@azure/app-configuration";
+import { AppConfigurationClient } from "@azure/app-configuration";
 
 // You should use string of Symbol identifiers in case there is no class
 // specified, and you only have an Interface. Always specify ServiceIdentifier as a type,
@@ -17,27 +13,25 @@ export const CONFIG: ServiceIdentifier<Config> = Symbol.for("CONFIG");
 // if you are using app settings
 appContainer
   .bind<Config>(CONFIG)
-  .toDynamicValue(async () => {    
+  .toDynamicValue(async () => {
     try {
       const connection_string = process.env.AZURE_APP_CONFIG_CONNECTION_STRING;
       const client = new AppConfigurationClient(connection_string);
 
-      const testFeatureFlag = await client.getConfigurationSetting({
-        key: `${featureFlagPrefix}test-feature-a`,
+      const { value: db_key } = await client.getConfigurationSetting({
+        key: "DB:COSMOS:KEY",
       });
-      const testAppSettingsTextAlign = await client.getConfigurationSetting({
-        key: "TestApp:Settings:TextAlign",
+      const { value: db_endpoint } = await client.getConfigurationSetting({
+        key: "DB:COSMOS:ENDPOINT",
       });
 
       return {
-        appName: "Test",
-        runningEnv: "local",
-        featureAEnabled: parseFeatureFlag(testFeatureFlag).value.enabled,
-        testAppSettingsTextAlign: testAppSettingsTextAlign.value,
+        db_key: db_key,
+        db_endpoint: db_endpoint,
       };
     } catch (e) {
       console.error(`GET app config error: ${e}`);
-      return {}
+      return {};
     }
   })
   .inSingletonScope();

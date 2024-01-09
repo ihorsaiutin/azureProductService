@@ -1,11 +1,10 @@
-import { inject, injectable } from "inversify";
+import { Context } from "@azure/functions";
+import { injectable } from "inversify";
+
 import { makeHandler } from "../common/inversify/make-handler";
-import { Context, HttpRequest } from "@azure/functions";
 import { BaseHandler } from "../common/handlers/base.handler";
 import { Logger } from "../common/logger/logger";
 import { ProductService } from "../modules/product/product.service";
-import { CONFIG } from "../common/config/di";
-import { Config } from "../common/config/types";
 
 @injectable()
 export class HttpProductHandler extends BaseHandler {
@@ -17,11 +16,9 @@ export class HttpProductHandler extends BaseHandler {
     this.logger.setClassContext(HttpProductHandler.name);
   }
 
-  @inject(CONFIG) config: Config;
   async executeFunction(context: Context): Promise<void> {
     try {
       this.logger.info("Processing HttpProductHandler request!");
-      this.logger.info(`featureAEnabled: ${this.config.featureAEnabled}`);
 
       const { id } = context.bindingData;
       const product = await this.productService.getProduct(id);

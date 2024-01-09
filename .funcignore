@@ -9,3 +9,5 @@ getting_started.md
 node_modules/azure-functions-core-tools
 node_modules/typescript
 terraform
+.env
+seeds
