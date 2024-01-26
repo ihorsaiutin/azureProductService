@@ -1,0 +1,12 @@
+{
+  "bindings": [
+    {
+      "name": "serviceBusItem",
+      "type": "serviceBusTrigger",
+      "direction": "in",
+      "queueName": "servicebus-queue-sand-ne-574",
+      "connection": "MyServiceBus"
+    }
+  ],
+  "scriptFile": "../dist/service-bus-import-product/index.js"
+}
