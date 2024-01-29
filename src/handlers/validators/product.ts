@@ -25,6 +25,6 @@ export class Product {
 
   @IsInt()
   @Min(0)
-  @Max(10000)
+  @Max(100_000_000)
   count: number;
 }

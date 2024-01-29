@@ -4,7 +4,8 @@
       "name": "serviceBusItem",
       "type": "serviceBusTrigger",
       "direction": "in",
-      "queueName": "servicebus-queue-sand-ne-574",
+      "topicName": "service-bus-topic-sand-ne-574",
+      "subscriptionName": "servicebus-subscription-sand-574",
       "connection": "MyServiceBus"
     }
   ],

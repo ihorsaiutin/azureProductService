@@ -30,7 +30,7 @@ export class ServiceBusImportProductHandler extends BaseHandler {
       const errors = await Promise.all(
         products.map((product) => validateProduct(product))
       );
-      if (errors.filter(Boolean).length !== 0) {
+      if (errors.flat().length !== 0) {
         context.res = {
           status: 400,
           headers: {

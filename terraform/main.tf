@@ -313,7 +313,7 @@ resource "azurerm_servicebus_namespace" "service_bus_ns" {
   name                          = "service-bus-sand-ne-574"
   location                      = azurerm_resource_group.service_bus_rg.location
   resource_group_name           = azurerm_resource_group.service_bus_rg.name
-  sku                           = "Basic"
+  sku                           = "Standard"
   capacity                      = 0 /* standard for sku plan */
   public_network_access_enabled = true /* can be changed to false for premium */
   minimum_tls_version           = "1.2"
@@ -332,4 +332,36 @@ resource "azurerm_servicebus_queue" "servicebus_queue" {
   duplicate_detection_history_time_window = "PT10M" /* ISO 8601 timespan duration, 5 min is max */
   requires_session                        = false
   dead_lettering_on_message_expiration    = false
+}
+
+resource "azurerm_servicebus_topic" "servicebus_topic" {
+  name                = "service-bus-topic-sand-ne-574"
+  namespace_id        = azurerm_servicebus_namespace.service_bus_ns.id
+  enable_partitioning = true
+}
+
+resource "azurerm_servicebus_subscription" "servicebus_subscription_test" {
+  name               = "servicebus-subscription-test-sand-574"
+  topic_id           = azurerm_servicebus_topic.servicebus_topic.id
+  max_delivery_count = 1
+}
+
+resource "azurerm_servicebus_subscription_rule" "subscription_rule_test" {
+  name            = "subscription-rule-test-574"
+  subscription_id = azurerm_servicebus_subscription.servicebus_subscription_test.id
+  filter_type     = "SqlFilter"
+  sql_filter      = "type = 'test'"
+}
+
+resource "azurerm_servicebus_subscription" "servicebus_subscription" {
+  name               = "servicebus-subscription-sand-574"
+  topic_id           = azurerm_servicebus_topic.servicebus_topic.id
+  max_delivery_count = 1
+}
+
+resource "azurerm_servicebus_subscription_rule" "subscription_rule_products" {
+  name            = "subscription-rule-products-574"
+  subscription_id = azurerm_servicebus_subscription.servicebus_subscription.id
+  filter_type     = "SqlFilter"
+  sql_filter      = "type = 'products'"
 }
