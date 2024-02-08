@@ -5,26 +5,32 @@ import { makeHandler } from "../common/inversify/make-handler";
 import { BaseHandler } from "../common/handlers/base.handler";
 import { Logger } from "../common/logger/logger";
 import { ProductService } from "../modules/product/product.service";
+import { NewUserProduct } from "../common/types";
 import { validateProduct } from "./utils/validateProduct";
 
 @injectable()
-export class HttpPostProductHandler extends BaseHandler {
+export class ServiceBusImportProductHandler extends BaseHandler {
   constructor(
     private readonly logger: Logger,
     private readonly productService: ProductService
   ) {
     super();
-    this.logger.setClassContext(HttpPostProductHandler.name);
+    this.logger.setClassContext(ServiceBusImportProductHandler.name);
   }
 
-  async executeFunction(context: Context): Promise<void> {
+  async executeFunction(
+    context: Context,
+    serviceBusItem: string
+  ): Promise<void> {
     try {
-      this.logger.info("Processing HttpPostProductHandler request!");
+      this.logger.info("Processing ServiceBusImportProductHandler request!");
 
-      const data = context.req.body;
+      const products: NewUserProduct[] = JSON.parse(serviceBusItem);
 
-      const errors = await validateProduct(data);
-      if (errors.length !== 0) {
+      const errors = await Promise.all(
+        products.map((product) => validateProduct(product))
+      );
+      if (errors.flat().length !== 0) {
         context.res = {
           status: 400,
           headers: {
@@ -35,14 +41,12 @@ export class HttpPostProductHandler extends BaseHandler {
         return;
       }
 
-      const product = await this.productService.createProduct(data);
+      await Promise.all(
+        products.map((product) => this.productService.createProduct(product))
+      );
 
       context.res = {
         status: 200,
-        headers: {
-          "content-type": "application/json",
-        },
-        body: product,
       };
     } catch (e) {
       this.logger.error(e);
@@ -53,4 +57,4 @@ export class HttpPostProductHandler extends BaseHandler {
   }
 }
 
-export const handler = makeHandler(HttpPostProductHandler);
+export const handler = makeHandler(ServiceBusImportProductHandler);
